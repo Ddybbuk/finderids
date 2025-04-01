@@ -1,12 +1,102 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useEffect } from 'react';
+import { Product, findProductById } from '@/data/products';
+import ProductScanner from '@/components/ProductScanner';
+import ProductDetails from '@/components/ProductDetails';
+import SearchHistory from '@/components/SearchHistory';
+import { Separator } from "@/components/ui/separator";
 
 const Index = () => {
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [searchHistory, setSearchHistory] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('productSearchHistory');
+    if (savedHistory) {
+      try {
+        setSearchHistory(JSON.parse(savedHistory));
+      } catch (error) {
+        console.error('Failed to parse search history:', error);
+        localStorage.removeItem('productSearchHistory');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('productSearchHistory', JSON.stringify(searchHistory));
+  }, [searchHistory]);
+
+  const handleProductFound = (productId: string) => {
+    const product = findProductById(productId);
+    if (product) {
+      setCurrentProduct(product);
+      
+      setSearchHistory(prevHistory => {
+        const filteredHistory = prevHistory.filter(item => item.id !== product.id);
+        return [product, ...filteredHistory].slice(0, 10);
+      });
+    }
+  };
+
+  const handleSelectFromHistory = (product: Product) => {
+    setCurrentProduct(product);
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('productSearchHistory');
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-factory-blue-dark text-white py-4 px-6 shadow-md">
+        <div className="container mx-auto">
+          <h1 className="text-2xl font-bold">Product Property Finder</h1>
+          <p className="text-factory-gray-light">Scan or search for product details</p>
+        </div>
+      </header>
+      
+      <main className="container mx-auto p-6 max-w-4xl">
+        <ProductScanner onProductFound={handleProductFound} />
+        
+        {currentProduct ? (
+          <div className="mt-6">
+            <ProductDetails product={currentProduct} />
+          </div>
+        ) : (
+          <div className="mt-10 text-center p-10 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="text-5xl mb-4">📦</div>
+            <h2 className="text-xl font-semibold text-factory-blue-dark mb-2">No Product Selected</h2>
+            <p className="text-factory-gray">
+              Enter a product ID in the search box or scan a product barcode to view its details.
+            </p>
+            <Separator className="my-6" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+              <div className="p-4 bg-gray-50 rounded-md">
+                <h3 className="font-medium mb-2">Example Product IDs:</h3>
+                <ul className="space-y-1 text-factory-gray">
+                  <li>P1001 - Hydraulic Pump</li>
+                  <li>P1002 - Electric Motor</li>
+                  <li>P1005 - PLC Controller</li>
+                </ul>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-md">
+                <h3 className="font-medium mb-2">Tips:</h3>
+                <ul className="space-y-1 text-factory-gray">
+                  <li>Press the barcode button to enable scan mode</li>
+                  <li>Recent searches are saved automatically</li>
+                  <li>Click on history items to view again</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <SearchHistory 
+          history={searchHistory} 
+          onSelectProduct={handleSelectFromHistory}
+          clearHistory={clearSearchHistory}
+        />
+      </main>
     </div>
   );
 };
