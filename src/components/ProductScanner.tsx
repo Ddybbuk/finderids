@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Barcode, AlertCircle } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
-import supabase from '@/lib/supabase';
 
 type ProductScannerProps = {
   onProductFound: (productId: string) => void;
@@ -30,27 +29,10 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
     setIsSearching(true);
     
     try {
-      // Check if product exists in Supabase
-      const { data, error } = await supabase
-        .from('products')
-        .select('id')
-        .eq('id', productId.trim())
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
-        throw error;
-      }
-
-      if (data) {
-        onProductFound(productId.trim());
-        setProductId('');
-      } else {
-        toast({
-          title: "Product not found",
-          description: `No product found with ID: ${productId}`,
-          variant: "destructive",
-        });
-      }
+      // We'll let the parent component handle the actual searching
+      // This simplifies the component and avoids duplicate logic
+      onProductFound(productId.trim());
+      setProductId('');
     } catch (error: any) {
       toast({
         title: "Error searching product",
