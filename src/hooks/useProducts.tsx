@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import supabase from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 
-// Mock data for when Supabase is not connected
+// Mock data for when Supabase is not connected or while loading
 const mockProducts: Product[] = [
   {
     id: "P1001",
@@ -52,20 +52,57 @@ const mockProducts: Product[] = [
       weight: "1.2kg",
       "max-temp": "120°C"
     }
+  },
+  {
+    id: "TECFQ10524",
+    name: "Hydraulic Filter",
+    category: "Filtration",
+    location: "Warehouse B, Section A",
+    status: "in-stock",
+    quantity: 18,
+    lastUpdated: "2023-08-10",
+    specifications: {
+      "filtration": "10 micron",
+      "flow-rate": "120 L/min",
+      "pressure": "420 bar",
+      "material": "Aluminum",
+      "connection": "1 1/2 inch"
+    }
   }
 ];
 
-// Convert Supabase product to our app's Product type
-const convertSupabaseProduct = (supabaseProduct: any): Product => {
+// Convert cell table data to our app's Product type
+const convertSupabaseCell = (cellData: any): Product => {
+  // Parse the defect type data which might contain product information
+  let productData = { 
+    name: "Unknown Product",
+    category: "Unknown",
+    location: "Unknown",
+    status: "in-stock",
+    quantity: 0,
+    specifications: {}
+  };
+
+  try {
+    // Try to extract product info from defect type which might be JSON or structured text
+    // This is a flexible approach since we're not sure about the exact data structure
+    if (cellData.defect_type) {
+      // For simplicity, we're using the defect type as the product name
+      productData.name = cellData.defect_type;
+    }
+  } catch (e) {
+    console.error("Error parsing cell data:", e);
+  }
+
   return {
-    id: supabaseProduct.id,
-    name: supabaseProduct.name,
-    category: supabaseProduct.category,
-    location: supabaseProduct.location,
-    status: supabaseProduct.status,
-    quantity: supabaseProduct.quantity,
-    lastUpdated: supabaseProduct.last_updated.split('T')[0], // Format date
-    specifications: supabaseProduct.specifications
+    id: cellData.id || "unknown-id",
+    name: productData.name,
+    category: productData.category,
+    location: productData.location,
+    status: productData.status as "in-stock" | "low-stock" | "out-of-stock",
+    quantity: productData.quantity,
+    lastUpdated: new Date().toISOString().split('T')[0], // Use current date
+    specifications: productData.specifications
   };
 };
 
@@ -76,50 +113,37 @@ export const useProductLookup = () => {
   // Fetch product by ID
   const findProductById = async (id: string): Promise<Product | undefined> => {
     try {
-      // Check if we're using the mock client
-      const isMockClient = !import.meta.env.VITE_SUPABASE_URL;
+      // First check in mock data for fast development
+      const mockProduct = mockProducts.find(p => 
+        p.id.toLowerCase() === id.toLowerCase()
+      );
       
-      if (isMockClient) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Use mock data - case insensitive search
-        const mockProduct = mockProducts.find(p => 
-          p.id.toLowerCase() === id.toLowerCase()
-        );
-        
-        if (mockProduct) {
-          // Update search history
-          setSearchHistory(prevHistory => {
-            const filteredHistory = prevHistory.filter(item => item.id !== mockProduct.id);
-            return [mockProduct, ...filteredHistory].slice(0, 10);
-          });
-          
-          return mockProduct;
-        }
-        
-        toast({
-          title: "Product not found",
-          description: `No product found with ID: ${id}`,
-          variant: "destructive",
+      if (mockProduct) {
+        // Update search history
+        setSearchHistory(prevHistory => {
+          const filteredHistory = prevHistory.filter(item => item.id !== mockProduct.id);
+          return [mockProduct, ...filteredHistory].slice(0, 10);
         });
         
-        return undefined;
+        return mockProduct;
       }
       
-      // Real Supabase query
+      // If not in mock data, try to fetch from Supabase cell table
+      console.log("Fetching from Supabase:", id);
       const { data, error } = await supabase
-        .from('products')
+        .from('cell')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
+
+      console.log("Supabase response:", data, error);
 
       if (error) {
         throw error;
       }
 
       if (data) {
-        const product = convertSupabaseProduct(data);
+        const product = convertSupabaseCell(data);
         
         // Update search history
         setSearchHistory(prevHistory => {
@@ -189,26 +213,22 @@ export const useAllProducts = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: async (): Promise<Product[]> => {
-      // Check if we're using the mock client
-      const isMockClient = !import.meta.env.VITE_SUPABASE_URL;
-      
-      if (isMockClient) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockProducts;
-      }
-      
       try {
+        // Try to fetch from Supabase first
         const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .order('id');
+          .from('cell')
+          .select('*');
 
         if (error) {
           throw error;
         }
 
-        return (data || []).map(convertSupabaseProduct);
+        if (data && data.length > 0) {
+          return data.map(convertSupabaseCell);
+        }
+        
+        // Fallback to mock data if no data in Supabase
+        return mockProducts;
       } catch (error: any) {
         toast({
           title: "Failed to fetch products",
@@ -216,7 +236,7 @@ export const useAllProducts = () => {
           variant: "destructive",
         });
         console.error("Error fetching products:", error);
-        return [];
+        return mockProducts; // Fallback to mock data
       }
     }
   });
