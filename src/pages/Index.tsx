@@ -1,49 +1,42 @@
+
 import React, { useState, useEffect } from 'react';
-import { Product, findProductById } from '@/data/products';
+import { Product } from '@/data/products';
 import ProductScanner from '@/components/ProductScanner';
 import ProductDetails from '@/components/ProductDetails';
 import SearchHistory from '@/components/SearchHistory';
 import { Separator } from "@/components/ui/separator";
+import { useProductLookup } from '@/hooks/useProducts';
 
 const Index = () => {
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
-  const [searchHistory, setSearchHistory] = useState<Product[]>([]);
+  const {
+    findProductById,
+    searchHistory,
+    setSearchHistory,
+    clearHistory,
+    loadHistoryFromLocalStorage,
+    saveHistoryToLocalStorage
+  } = useProductLookup();
 
   useEffect(() => {
-    const savedHistory = localStorage.getItem('productSearchHistory');
-    if (savedHistory) {
-      try {
-        setSearchHistory(JSON.parse(savedHistory));
-      } catch (error) {
-        console.error('Failed to parse search history:', error);
-        localStorage.removeItem('productSearchHistory');
-      }
-    }
+    // Load search history from localStorage on component mount
+    loadHistoryFromLocalStorage();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('productSearchHistory', JSON.stringify(searchHistory));
+    // Save search history to localStorage whenever it changes
+    saveHistoryToLocalStorage();
   }, [searchHistory]);
 
-  const handleProductFound = (productId: string) => {
-    const product = findProductById(productId);
+  const handleProductFound = async (productId: string) => {
+    const product = await findProductById(productId);
     if (product) {
       setCurrentProduct(product);
-      
-      setSearchHistory(prevHistory => {
-        const filteredHistory = prevHistory.filter(item => item.id !== product.id);
-        return [product, ...filteredHistory].slice(0, 10);
-      });
     }
   };
 
   const handleSelectFromHistory = (product: Product) => {
     setCurrentProduct(product);
-  };
-
-  const clearSearchHistory = () => {
-    setSearchHistory([]);
-    localStorage.removeItem('productSearchHistory');
   };
 
   return (
@@ -94,7 +87,7 @@ const Index = () => {
         <SearchHistory 
           history={searchHistory} 
           onSelectProduct={handleSelectFromHistory}
-          clearHistory={clearSearchHistory}
+          clearHistory={clearHistory}
         />
       </main>
     </div>

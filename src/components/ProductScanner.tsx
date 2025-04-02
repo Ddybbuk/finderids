@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Barcode, AlertCircle } from 'lucide-react';
-import { findProductById } from '@/data/products';
 import { useToast } from "@/components/ui/use-toast";
+import supabase from '@/lib/supabase';
 
 type ProductScannerProps = {
   onProductFound: (productId: string) => void;
@@ -13,10 +13,11 @@ type ProductScannerProps = {
 const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
   const [productId, setProductId] = useState<string>('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!productId.trim()) {
       toast({
         title: "Input is empty",
@@ -26,16 +27,39 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
       return;
     }
 
-    const product = findProductById(productId.trim());
-    if (product) {
-      onProductFound(productId.trim());
-      setProductId('');
-    } else {
+    setIsSearching(true);
+    
+    try {
+      // Check if product exists in Supabase
+      const { data, error } = await supabase
+        .from('products')
+        .select('id')
+        .eq('id', productId.trim())
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw error;
+      }
+
+      if (data) {
+        onProductFound(productId.trim());
+        setProductId('');
+      } else {
+        toast({
+          title: "Product not found",
+          description: `No product found with ID: ${productId}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
       toast({
-        title: "Product not found",
-        description: `No product found with ID: ${productId}`,
+        title: "Error searching product",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -71,6 +95,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
             onChange={(e) => setProductId(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className={`pr-10 ${isScanning ? 'border-factory-teal animate-pulse-light' : ''}`}
+            disabled={isSearching}
           />
           {isScanning && (
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -81,14 +106,25 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
         <Button 
           onClick={handleSearch}
           className="bg-factory-blue hover:bg-factory-blue-dark"
+          disabled={isSearching}
         >
-          <Search className="h-4 w-4 mr-2" />
-          Search
+          {isSearching ? (
+            <div className="flex items-center">
+              <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              Searching...
+            </div>
+          ) : (
+            <>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </>
+          )}
         </Button>
         <Button
           variant={isScanning ? "default" : "outline"}
           className={isScanning ? "bg-factory-teal hover:bg-factory-blue" : ""}
           onClick={handleScanMode}
+          disabled={isSearching}
         >
           <Barcode className="h-4 w-4" />
         </Button>
