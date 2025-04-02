@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import supabase from '@/lib/supabase';
 import { Product } from '@/data/products';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data for when Supabase is not connected
 const mockProducts: Product[] = [
@@ -36,6 +36,22 @@ const mockProducts: Product[] = [
     quantity: 8,
     lastUpdated: "2023-05-20",
     specifications: { inputs: 16, outputs: 12, communication: "Ethernet/IP" }
+  },
+  {
+    id: "TECEQAG140",
+    name: "Pressure Control Valve",
+    category: "Hydraulics",
+    location: "Warehouse A, Section D",
+    status: "in-stock",
+    quantity: 12,
+    lastUpdated: "2023-07-05",
+    specifications: { 
+      pressure: "350 bar", 
+      connection: "G1/4", 
+      material: "Stainless Steel",
+      weight: "1.2kg",
+      "max-temp": "120°C"
+    }
   }
 ];
 
@@ -67,8 +83,10 @@ export const useProductLookup = () => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Use mock data
-        const mockProduct = mockProducts.find(p => p.id === id);
+        // Use mock data - case insensitive search
+        const mockProduct = mockProducts.find(p => 
+          p.id.toLowerCase() === id.toLowerCase()
+        );
         
         if (mockProduct) {
           // Update search history
