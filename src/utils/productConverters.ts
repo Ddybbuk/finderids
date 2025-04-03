@@ -6,10 +6,10 @@ export const convertSupabaseCell = (cellData: any): Product => {
   return {
     id: cellData.id || "unknown-id",
     name: cellData["defect type"] || "Unknown Defect",
-    category: "",
+    category: cellData["#"] ? `Row #: ${cellData["#"]}` : "",
     location: "",
     status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
-    quantity: 0,
+    quantity: cellData.value || 0,
     lastUpdated: new Date().toISOString().split('T')[0],
     specifications: {}
   };

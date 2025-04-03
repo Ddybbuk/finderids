@@ -41,23 +41,18 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
           {history.map((product) => (
             <li 
               key={product.id} 
-              className="flex justify-between p-3 hover:bg-gray-50 cursor-pointer"
+              className="flex flex-col p-3 hover:bg-gray-50 cursor-pointer"
               onClick={() => onSelectProduct(product)}
             >
-              <div className="flex items-center">
+              <div className="flex justify-between">
                 <span className="font-medium">{product.id}</span>
-                <span className="mx-2 text-factory-gray">-</span>
-                <span className="text-factory-gray">{product.name}</span>
+                <span className="text-sm text-factory-gray">{product.category}</span>
               </div>
-              <div className="flex items-center">
-                <span className={`h-2 w-2 rounded-full mr-2 ${
-                  product.status === 'in-stock' 
-                    ? 'bg-green-500' 
-                    : product.status === 'low-stock' 
-                    ? 'bg-yellow-500' 
-                    : 'bg-red-500'
-                }`}></span>
-                <span className="text-sm text-factory-gray capitalize">{product.status.replace('-', ' ')}</span>
+              <div className="mt-1">
+                <span className="text-factory-gray">{product.name}</span>
+                {product.quantity > 0 && (
+                  <span className="ml-2 text-sm text-factory-gray">Value: {product.quantity}</span>
+                )}
               </div>
             </li>
           ))}

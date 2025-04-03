@@ -14,16 +14,19 @@ export type Database = {
           "#": number
           "defect type": string
           id: string | null
+          value: number | null
         }
         Insert: {
           "#"?: number
           "defect type": string
           id?: string | null
+          value?: number | null
         }
         Update: {
           "#"?: number
           "defect type"?: string
           id?: string | null
+          value?: number | null
         }
         Relationships: []
       }

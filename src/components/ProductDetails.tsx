@@ -22,8 +22,24 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="text-center py-4">
-          <p className="text-lg font-medium">Defect Type: {product.name}</p>
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-3 rounded-md">
+            <p className="text-lg font-medium mb-2">Defect Type: {product.name}</p>
+          </div>
+          
+          {product.category && (
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-sm text-factory-gray mb-1">Row Number</p>
+              <p className="font-medium">{product.category.replace('Row #: ', '')}</p>
+            </div>
+          )}
+          
+          {product.quantity > 0 && (
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-sm text-factory-gray mb-1">Value</p>
+              <p className="font-medium">{product.quantity}</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
