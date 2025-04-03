@@ -40,6 +40,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               <p className="font-medium">{product.quantity}</p>
             </div>
           )}
+          
+          {product.location && (
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-sm text-factory-gray mb-1">Date</p>
+              <p className="font-medium">{product.location}</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

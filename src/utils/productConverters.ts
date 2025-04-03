@@ -7,7 +7,7 @@ export const convertSupabaseCell = (cellData: any): Product => {
     id: cellData.id || "unknown-id",
     name: cellData["defect type"] || "Unknown Defect",
     category: cellData["#"] ? `Row #: ${cellData["#"]}` : "",
-    location: "",
+    location: cellData.date || "",
     status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
     quantity: cellData.value || 0,
     lastUpdated: new Date().toISOString().split('T')[0],

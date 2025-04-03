@@ -12,18 +12,21 @@ export type Database = {
       cell: {
         Row: {
           "#": number
+          date: string | null
           "defect type": string
           id: string | null
           value: number | null
         }
         Insert: {
           "#"?: number
+          date?: string | null
           "defect type": string
           id?: string | null
           value?: number | null
         }
         Update: {
           "#"?: number
+          date?: string | null
           "defect type"?: string
           id?: string | null
           value?: number | null

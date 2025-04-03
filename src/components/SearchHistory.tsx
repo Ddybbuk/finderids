@@ -53,6 +53,9 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
                 {product.quantity > 0 && (
                   <span className="ml-2 text-sm text-factory-gray">Value: {product.quantity}</span>
                 )}
+                {product.location && (
+                  <span className="ml-2 text-sm text-factory-gray">Date: {product.location}</span>
+                )}
               </div>
             </li>
           ))}
