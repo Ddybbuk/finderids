@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/data/products';
 import { convertSupabaseCell } from '@/utils/productConverters';
 
-// Hook to fetch all products (useful for admin interfaces or dropdowns)
+// Hook to fetch all products
 export const useAllProducts = () => {
   const { toast } = useToast();
 

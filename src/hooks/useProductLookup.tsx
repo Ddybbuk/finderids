@@ -21,7 +21,6 @@ export const useProductLookup = () => {
     try {
       console.log("Fetching from Supabase:", id);
       
-      // Changed from maybeSingle() to select() to handle multiple rows
       const { data, error } = await supabase
         .from('cell')
         .select('*')
