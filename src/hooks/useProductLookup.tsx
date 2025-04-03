@@ -20,11 +20,12 @@ export const useProductLookup = () => {
   const findProductById = async (id: string): Promise<Product | undefined> => {
     try {
       console.log("Fetching from Supabase:", id);
+      
+      // Changed from maybeSingle() to select() to handle multiple rows
       const { data, error } = await supabase
         .from('cell')
         .select('*')
-        .ilike('id', id)
-        .maybeSingle();
+        .ilike('id', id);
 
       console.log("Supabase response:", data, error);
 
@@ -32,8 +33,9 @@ export const useProductLookup = () => {
         throw error;
       }
 
-      if (data) {
-        const product = convertSupabaseCell(data);
+      if (data && data.length > 0) {
+        // Take the first item if multiple results exist
+        const product = convertSupabaseCell(data[0]);
         
         // Update search history
         addToHistory(product);
