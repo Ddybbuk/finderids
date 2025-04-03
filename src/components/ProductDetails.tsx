@@ -47,6 +47,18 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               <p className="font-medium">{product.location}</p>
             </div>
           )}
+          
+          {/* Display all other specifications dynamically */}
+          {Object.entries(product.specifications).length > 0 && (
+            <>
+              {Object.entries(product.specifications).map(([key, value]) => (
+                <div key={key} className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-sm text-factory-gray mb-1">{key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' ')}</p>
+                  <p className="font-medium">{value}</p>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

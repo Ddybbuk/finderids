@@ -56,6 +56,13 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
                 {product.location && (
                   <span className="ml-2 text-sm text-factory-gray">Date: {product.location}</span>
                 )}
+                
+                {/* Display all specifications in search history */}
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <span key={key} className="ml-2 text-sm text-factory-gray">
+                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' ')}: {value}
+                  </span>
+                ))}
               </div>
             </li>
           ))}
