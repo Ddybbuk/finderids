@@ -7,7 +7,7 @@ export const convertSupabaseCell = (cellData: any): Product => {
   const specifications: Record<string, string | number> = {};
   
   // Add all fields from cellData to specifications except ones we explicitly handle 
-  // and excluding row and row number
+  // and excluding row, row number and other system fields
   Object.entries(cellData).forEach(([key, value]) => {
     if (!['id', 'defect type', '#', 'value', 'date', 'row', 'row number'].includes(key.toLowerCase()) && value !== null) {
       specifications[key] = value as string | number;
