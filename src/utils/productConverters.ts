@@ -6,9 +6,10 @@ export const convertSupabaseCell = (cellData: any): Product => {
   // Create a specifications object with all columns that aren't explicitly mapped
   const specifications: Record<string, string | number> = {};
   
-  // Add all fields from cellData to specifications except ones we explicitly handle
+  // Add all fields from cellData to specifications except ones we explicitly handle 
+  // and excluding row and row number
   Object.entries(cellData).forEach(([key, value]) => {
-    if (!['id', 'defect type', '#', 'value', 'date'].includes(key) && value !== null) {
+    if (!['id', 'defect type', '#', 'value', 'date', 'row', 'row number'].includes(key.toLowerCase()) && value !== null) {
       specifications[key] = value as string | number;
     }
   });

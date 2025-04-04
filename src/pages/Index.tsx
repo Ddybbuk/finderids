@@ -15,6 +15,8 @@ const Index = () => {
     searchHistory,
     setSearchHistory,
     clearHistory,
+    maxHistoryItems,
+    changeMaxHistoryItems,
     loadHistoryFromLocalStorage,
     saveHistoryToLocalStorage
   } = useProductLookup();
@@ -27,7 +29,7 @@ const Index = () => {
   useEffect(() => {
     // Save search history to localStorage whenever it changes
     saveHistoryToLocalStorage();
-  }, [searchHistory]);
+  }, [searchHistory, maxHistoryItems]);
 
   const handleProductFound = async (productId: string) => {
     const product = await findProductById(productId);
@@ -80,6 +82,8 @@ const Index = () => {
               searchHistory={searchHistory}
               onSelectProduct={handleSelectFromHistory}
               clearHistory={clearHistory}
+              maxHistoryItems={maxHistoryItems}
+              onChangeMaxItems={changeMaxHistoryItems}
             />
           </TabsContent>
         </Tabs>

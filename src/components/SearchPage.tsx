@@ -11,6 +11,8 @@ type SearchPageProps = {
   searchHistory: Product[];
   onSelectProduct: (product: Product) => void;
   clearHistory: () => void;
+  maxHistoryItems: number;
+  onChangeMaxItems: (newMax: number) => void;
 };
 
 const SearchPage: React.FC<SearchPageProps> = ({ 
@@ -18,7 +20,9 @@ const SearchPage: React.FC<SearchPageProps> = ({
   onProductFound, 
   searchHistory, 
   onSelectProduct, 
-  clearHistory 
+  clearHistory,
+  maxHistoryItems,
+  onChangeMaxItems
 }) => {
   return (
     <div>
@@ -42,6 +46,8 @@ const SearchPage: React.FC<SearchPageProps> = ({
         history={searchHistory} 
         onSelectProduct={onSelectProduct}
         clearHistory={clearHistory}
+        maxHistoryItems={maxHistoryItems}
+        onChangeMaxItems={onChangeMaxItems}
       />
     </div>
   );

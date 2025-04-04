@@ -12,6 +12,8 @@ export const useProductLookup = () => {
     setSearchHistory,
     addToHistory,
     clearHistory,
+    maxHistoryItems,
+    changeMaxHistoryItems,
     saveHistoryToLocalStorage,
     loadHistoryFromLocalStorage
   } = useProductHistory();
@@ -65,6 +67,8 @@ export const useProductLookup = () => {
     searchHistory,
     setSearchHistory,
     clearHistory,
+    maxHistoryItems,
+    changeMaxHistoryItems,
     saveHistoryToLocalStorage,
     loadHistoryFromLocalStorage
   };
