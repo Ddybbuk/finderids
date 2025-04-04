@@ -15,6 +15,7 @@ export type Database = {
           date: string | null
           "defect type": string
           id: string | null
+          side: number | null
           value: number | null
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           date?: string | null
           "defect type": string
           id?: string | null
+          side?: number | null
           value?: number | null
         }
         Update: {
@@ -29,6 +31,7 @@ export type Database = {
           date?: string | null
           "defect type"?: string
           id?: string | null
+          side?: number | null
           value?: number | null
         }
         Relationships: []
