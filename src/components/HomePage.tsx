@@ -9,7 +9,7 @@ type HomePageProps = {
 const HomePage: React.FC<HomePageProps> = ({ onNavigateToSearch }) => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center"Cell Information Finder</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Cell Information Finder</h2>
       <p className="text-center text-gray-600 mb-6">
         This application helps you quickly find and view product properties from the database.
       </p>

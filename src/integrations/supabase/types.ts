@@ -15,6 +15,7 @@ export type Database = {
           date: string | null
           "defect type": string
           id: string | null
+          IV: number | null
           side: number | null
           value: number | null
         }
@@ -23,6 +24,7 @@ export type Database = {
           date?: string | null
           "defect type": string
           id?: string | null
+          IV?: number | null
           side?: number | null
           value?: number | null
         }
@@ -31,6 +33,7 @@ export type Database = {
           date?: string | null
           "defect type"?: string
           id?: string | null
+          IV?: number | null
           side?: number | null
           value?: number | null
         }
