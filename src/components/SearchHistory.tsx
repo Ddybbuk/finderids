@@ -3,9 +3,15 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Product } from '@/data/products';
-import { Clock, Settings } from 'lucide-react';
+import { Clock, Settings, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type SearchHistoryProps = {
   history: Product[];
@@ -23,6 +29,20 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
   onChangeMaxItems
 }) => {
   const [showSettings, setShowSettings] = useState(false);
+  const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({
+    id: true,
+    defectType: true,
+    value: true,
+    date: true,
+    specifications: true
+  });
+
+  const toggleField = (field: string) => {
+    setVisibleFields(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
 
   if (history.length === 0) {
     return null;
@@ -36,6 +56,65 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
           <CardTitle className="text-sm font-medium">Recent Searches</CardTitle>
         </div>
         <div className="flex items-center space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs h-7"
+              >
+                <Filter className="h-3 w-3 mr-1" />
+                Filter
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56" align="end">
+              <div className="space-y-2">
+                <h3 className="font-medium text-sm">Show/Hide Fields</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="id" 
+                      checked={visibleFields.id} 
+                      onCheckedChange={() => toggleField('id')} 
+                    />
+                    <label htmlFor="id" className="text-sm">ID</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="defectType" 
+                      checked={visibleFields.defectType} 
+                      onCheckedChange={() => toggleField('defectType')} 
+                    />
+                    <label htmlFor="defectType" className="text-sm">Defect Type</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="value" 
+                      checked={visibleFields.value} 
+                      onCheckedChange={() => toggleField('value')} 
+                    />
+                    <label htmlFor="value" className="text-sm">Value</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="date" 
+                      checked={visibleFields.date} 
+                      onCheckedChange={() => toggleField('date')} 
+                    />
+                    <label htmlFor="date" className="text-sm">Date</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="specifications" 
+                      checked={visibleFields.specifications} 
+                      onCheckedChange={() => toggleField('specifications')} 
+                    />
+                    <label htmlFor="specifications" className="text-sm">Specifications</label>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -87,19 +166,21 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
                 onClick={() => onSelectProduct(product)}
               >
                 <div className="flex justify-between">
-                  <span className="font-medium">{product.id}</span>
+                  {visibleFields.id && <span className="font-medium">{product.id}</span>}
                 </div>
                 <div className="mt-1">
-                  <span className="text-factory-gray">{product.name}</span>
-                  {product.quantity > 0 && (
+                  {visibleFields.defectType && <span className="text-factory-gray">{product.name}</span>}
+                  
+                  {visibleFields.value && product.quantity > 0 && (
                     <span className="ml-2 text-sm text-factory-gray">Value: {product.quantity}</span>
                   )}
-                  {product.location && (
+                  
+                  {visibleFields.date && product.location && (
                     <span className="ml-2 text-sm text-factory-gray">Date: {product.location}</span>
                   )}
                   
-                  {/* Display all specifications in search history */}
-                  {Object.entries(product.specifications).map(([key, value]) => (
+                  {/* Display specifications in search history with filtering */}
+                  {visibleFields.specifications && Object.entries(product.specifications).map(([key, value]) => (
                     <span key={key} className="ml-2 text-sm text-factory-gray">
                       {key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' ')}: {value}
                     </span>
