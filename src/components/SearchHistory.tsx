@@ -88,7 +88,6 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
               >
                 <div className="flex justify-between">
                   <span className="font-medium">{product.id}</span>
-                  <span className="text-sm text-factory-gray">{product.category}</span>
                 </div>
                 <div className="mt-1">
                   <span className="text-factory-gray">{product.name}</span>

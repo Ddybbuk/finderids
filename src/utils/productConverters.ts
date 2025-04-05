@@ -17,7 +17,7 @@ export const convertSupabaseCell = (cellData: any): Product => {
   return {
     id: cellData.id || "unknown-id",
     name: cellData["defect type"] || "Unknown Defect",
-    category: cellData["#"] ? `Row #: ${cellData["#"]}` : "",
+    category: "", // No longer using row number for category
     location: cellData.date || "",
     status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
     quantity: cellData.value || 0,
