@@ -13,9 +13,12 @@ export const useAllProducts = () => {
     queryKey: ['products'],
     queryFn: async (): Promise<Product[]> => {
       try {
+        console.log("Fetching all pallets from Supabase");
         const { data, error } = await supabase
           .from('pallet')
           .select('*');
+
+        console.log("All pallets query result:", data, error);
 
         if (error) {
           throw error;
@@ -27,7 +30,7 @@ export const useAllProducts = () => {
         
         toast({
           title: "No products found",
-          description: "There are no products in the database",
+          description: "There are no pallets in the database",
           variant: "destructive",
         });
         return [];

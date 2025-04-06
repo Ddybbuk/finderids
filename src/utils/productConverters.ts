@@ -28,6 +28,8 @@ export const convertSupabaseCell = (cellData: any): Product => {
 
 // Convert pallet table data to our app's Product type
 export const convertSupabasePallet = (palletData: any): Product => {
+  console.log("Raw pallet data to convert:", palletData);
+  
   // Create a specifications object with all columns that aren't explicitly mapped
   const specifications: Record<string, string | number> = {};
   
@@ -39,8 +41,8 @@ export const convertSupabasePallet = (palletData: any): Product => {
   });
 
   return {
-    id: palletData.PalletID || palletData.id?.toString() || "unknown-id",
-    name: `Pallet ${palletData.PalletID || ''}`,
+    id: palletData.PalletID || `ID-${palletData.id.toString()}`,
+    name: `Pallet ${palletData.PalletID || palletData.id?.toString() || ''}`,
     category: "Pallet",
     location: palletData["Dzien pracy"] || "",
     status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
