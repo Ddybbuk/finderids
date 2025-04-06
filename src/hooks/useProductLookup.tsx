@@ -23,10 +23,22 @@ export const useProductLookup = () => {
     try {
       console.log("Fetching from Supabase:", id);
       
-      const { data, error } = await supabase
+      // First try an exact match
+      let { data, error } = await supabase
         .from('pallet')
         .select('*')
-        .ilike('PalletID', id);
+        .eq('PalletID', id);
+
+      // If no results with exact match, try a case-insensitive search
+      if (!data || data.length === 0) {
+        const { data: likeData, error: likeError } = await supabase
+          .from('pallet')
+          .select('*')
+          .ilike('PalletID', `%${id}%`);
+          
+        data = likeData;
+        error = likeError;
+      }
 
       console.log("Supabase response:", data, error);
 

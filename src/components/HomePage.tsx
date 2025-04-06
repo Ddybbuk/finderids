@@ -11,7 +11,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToSearch }) => {
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-center">Pallet Information Finder</h2>
       <p className="text-center text-gray-600 mb-6">
-        Search and view pallet information from the database.
+        Search and view pallet information from the database. Use the pallet ID to find specific pallets.
       </p>
       
       <div className="flex justify-center">
