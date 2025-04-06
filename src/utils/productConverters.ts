@@ -33,19 +33,24 @@ export const convertSupabasePallet = (palletData: any): Product => {
   
   // Add all fields from palletData to specifications except ones we explicitly handle
   Object.entries(palletData).forEach(([key, value]) => {
-    if (!['id', 'name', 'quantity', 'date', 'status'].includes(key.toLowerCase()) && value !== null) {
+    if (!['id', 'PalletID', 'FIFO', 'Dzien pracy', 'RFID'].includes(key) && value !== null) {
       specifications[key] = value as string | number;
     }
   });
 
   return {
-    id: palletData.id || "unknown-id",
-    name: palletData.name || "Unknown Product",
-    category: palletData.category || "",
-    location: palletData.date || palletData.location || "",
-    status: (palletData.status as "in-stock" | "low-stock" | "out-of-stock") || "in-stock",
-    quantity: palletData.quantity || 0,
+    id: palletData.PalletID || palletData.id?.toString() || "unknown-id",
+    name: `Pallet ${palletData.PalletID || ''}`,
+    category: "Pallet",
+    location: palletData["Dzien pracy"] || "",
+    status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
+    quantity: palletData.FIFO || 0,
     lastUpdated: new Date().toISOString().split('T')[0],
-    specifications: specifications
+    specifications: {
+      ...specifications,
+      RFID: palletData.RFID || "N/A",
+      FIFO: palletData.FIFO || 0,
+      "Work Day": palletData["Dzien pracy"] || "N/A"
+    }
   };
 };
