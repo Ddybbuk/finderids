@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/data/products';
-import { convertSupabasePallet } from '@/utils/productConverters';
+import { convertSupabaseCell } from '@/utils/productConverters';
 
 // Hook to fetch all products
 export const useAllProducts = () => {
@@ -14,7 +14,7 @@ export const useAllProducts = () => {
     queryFn: async (): Promise<Product[]> => {
       try {
         const { data, error } = await supabase
-          .from('pallet')
+          .from('cell')
           .select('*');
 
         if (error) {
@@ -22,7 +22,7 @@ export const useAllProducts = () => {
         }
 
         if (data && data.length > 0) {
-          return data.map(convertSupabasePallet);
+          return data.map(convertSupabaseCell);
         }
         
         toast({

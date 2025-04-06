@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/data/products';
 import { useProductHistory } from './useProductHistory';
-import { convertSupabasePallet } from '@/utils/productConverters';
+import { convertSupabaseCell } from '@/utils/productConverters';
 
 export const useProductLookup = () => {
   const { toast } = useToast();
@@ -24,7 +24,7 @@ export const useProductLookup = () => {
       console.log("Fetching from Supabase:", id);
       
       const { data, error } = await supabase
-        .from('pallet')
+        .from('cell')
         .select('*')
         .ilike('id', id);
 
@@ -36,7 +36,7 @@ export const useProductLookup = () => {
 
       if (data && data.length > 0) {
         // Take the first item if multiple results exist
-        const product = convertSupabasePallet(data[0]);
+        const product = convertSupabaseCell(data[0]);
         
         // Update search history
         addToHistory(product);
