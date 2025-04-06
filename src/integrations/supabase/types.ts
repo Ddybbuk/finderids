@@ -9,36 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      cell: {
+      pallet: {
         Row: {
-          "#": number
-          date: string | null
-          "defect type": string
-          id: string | null
-          IV: number | null
-          mvday: number | null
-          side: number | null
-          value: number | null
+          "Dzien pracy": string | null
+          FIFO: number | null
+          id: number
+          PalletID: string | null
+          RFID: string | null
         }
         Insert: {
-          "#"?: number
-          date?: string | null
-          "defect type": string
-          id?: string | null
-          IV?: number | null
-          mvday?: number | null
-          side?: number | null
-          value?: number | null
+          "Dzien pracy"?: string | null
+          FIFO?: number | null
+          id: number
+          PalletID?: string | null
+          RFID?: string | null
         }
         Update: {
-          "#"?: number
-          date?: string | null
-          "defect type"?: string
-          id?: string | null
-          IV?: number | null
-          mvday?: number | null
-          side?: number | null
-          value?: number | null
+          "Dzien pracy"?: string | null
+          FIFO?: number | null
+          id?: number
+          PalletID?: string | null
+          RFID?: string | null
         }
         Relationships: []
       }
