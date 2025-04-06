@@ -16,6 +16,7 @@ export type Database = {
           "defect type": string
           id: string | null
           IV: number | null
+          mvday: number | null
           side: number | null
           value: number | null
         }
@@ -25,6 +26,7 @@ export type Database = {
           "defect type": string
           id?: string | null
           IV?: number | null
+          mvday?: number | null
           side?: number | null
           value?: number | null
         }
@@ -34,6 +36,7 @@ export type Database = {
           "defect type"?: string
           id?: string | null
           IV?: number | null
+          mvday?: number | null
           side?: number | null
           value?: number | null
         }

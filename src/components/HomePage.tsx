@@ -9,9 +9,9 @@ type HomePageProps = {
 const HomePage: React.FC<HomePageProps> = ({ onNavigateToSearch }) => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Cell Information Finder</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Pallet Information Finder</h2>
       <p className="text-center text-gray-600 mb-6">
-        Search Cell's information.
+        Search and view pallet information from the database.
       </p>
       
       <div className="flex justify-center">
