@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Barcode, AlertCircle } from 'lucide-react';
+import { Search, Barcode, AlertCircle, Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 type ProductScannerProps = {
@@ -18,6 +18,11 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
 
   const handleSearch = async () => {
     if (!productId.trim()) {
+      toast({
+        title: "Please enter an ID",
+        description: "Enter a pallet ID to search for",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -49,10 +54,10 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
   // Auto-search when user types or pastes text (with small debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (productId.trim().length > 0) {
+      if (productId.trim().length > 3) { // Only search if at least 4 characters
         handleSearch();
       }
-    }, 300); // 300ms debounce
+    }, 500); // Longer debounce time for better UX
     
     return () => clearTimeout(timer);
   }, [productId]);
@@ -64,7 +69,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
           <Input
             ref={inputRef}
             type="text"
-            placeholder={isScanning ? "Scan barcode..." : "Enter product ID..."}
+            placeholder={isScanning ? "Scan barcode..." : "Enter pallet ID..."}
             value={productId}
             onChange={(e) => setProductId(e.target.value)}
             className={`pr-10 ${isScanning ? 'border-factory-teal animate-pulse-light' : ''}`}
@@ -85,6 +90,13 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
         >
           <Barcode className="h-4 w-4" />
         </Button>
+        <Button
+          onClick={handleSearch}
+          disabled={isSearching || !productId.trim()}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
       </div>
       
       {isScanning && (
@@ -93,6 +105,11 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
           <p>Scan mode is active. Scanned barcodes will be processed automatically.</p>
         </div>
       )}
+      
+      <div className="flex items-center p-2 bg-gray-50 rounded text-sm">
+        <Info className="h-4 w-4 text-gray-500 mr-2" />
+        <p>Try searching by exact ID (e.g., "PTQF31083") or partial ID (e.g., "31083")</p>
+      </div>
     </div>
   );
 };

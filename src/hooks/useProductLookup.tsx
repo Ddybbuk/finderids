@@ -23,21 +23,44 @@ export const useProductLookup = () => {
     try {
       console.log("Fetching from Supabase:", id);
       
-      // First try an exact match
-      let { data, error } = await supabase
+      // Try multiple search approaches
+      let data;
+      let error;
+
+      // 1. First, try an exact match
+      const exactMatch = await supabase
         .from('pallet')
         .select('*')
         .eq('PalletID', id);
-
-      // If no results with exact match, try a case-insensitive search
-      if (!data || data.length === 0) {
-        const { data: likeData, error: likeError } = await supabase
-          .from('pallet')
-          .select('*')
-          .ilike('PalletID', `%${id}%`);
-          
-        data = likeData;
-        error = likeError;
+      
+      if (exactMatch.data && exactMatch.data.length > 0) {
+        data = exactMatch.data;
+        error = exactMatch.error;
+      } else {
+        // 2. Try without leading zeros if it has them
+        const withoutLeadingZeros = id.replace(/^0+/, '');
+        if (withoutLeadingZeros !== id) {
+          const noZerosMatch = await supabase
+            .from('pallet')
+            .select('*')
+            .eq('PalletID', withoutLeadingZeros);
+            
+          if (noZerosMatch.data && noZerosMatch.data.length > 0) {
+            data = noZerosMatch.data;
+            error = noZerosMatch.error;
+          }
+        }
+        
+        // 3. Try with case-insensitive partial match as last resort
+        if (!data || data.length === 0) {
+          const partialMatch = await supabase
+            .from('pallet')
+            .select('*')
+            .ilike('PalletID', `%${id}%`);
+            
+          data = partialMatch.data;
+          error = partialMatch.error;
+        }
       }
 
       console.log("Supabase response:", data, error);
