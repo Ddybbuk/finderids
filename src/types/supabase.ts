@@ -71,6 +71,35 @@ export interface Database {
           [key: string]: any
         }
       },
+      degas: {
+        Row: {
+          id: string
+          "defect type"?: string | null
+          date?: string | null
+          value?: number | null
+          row?: number | null
+          "row number"?: number | null
+          [key: string]: any
+        }
+        Insert: {
+          id: string
+          "defect type"?: string | null
+          date?: string | null
+          value?: number | null
+          row?: number | null
+          "row number"?: number | null
+          [key: string]: any
+        }
+        Update: {
+          id?: string
+          "defect type"?: string | null
+          date?: string | null
+          value?: number | null
+          row?: number | null
+          "row number"?: number | null
+          [key: string]: any
+        }
+      },
       pallet: {
         Row: {
           id: number
@@ -104,3 +133,4 @@ export interface Database {
     }
   }
 }
+
