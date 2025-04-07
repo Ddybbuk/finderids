@@ -1,56 +1,111 @@
+// src/components/ProductScanner.tsx
+import React, { useState, useRef, useEffect } from 'react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, Barcode, AlertCircle } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast"; // Or correct path to use-toast
 
-import React from 'react';
-import { Product } from '@/data/products';
-import ProductScanner from '@/components/ProductScanner';
-import ProductDetails from '@/components/ProductDetails';
-import SearchHistory from '@/components/SearchHistory';
-
-type SearchPageProps = {
-  currentProduct: Product | null;
-  onProductFound: (productId: string) => void;
-  searchHistory: Product[];
-  onSelectProduct: (product: Product) => void;
-  clearHistory: () => void;
-  maxHistoryItems: number;
-  onChangeMaxItems: (newMax: number) => void;
+// --- MODIFICATION START ---
+type ProductScannerProps = {
+  onProductFound: (productId: string) => Promise<boolean>; // Existing prop
+  clearInputOnScanSuccess?: boolean; // <<< --- ADD THIS LINE ---
+                                      // Using '?' makes it optional, which is good practice
+                                      // especially since we provide a default value below.
 };
+// --- MODIFICATION END ---
 
-const SearchPage: React.FC<SearchPageProps> = ({ 
-  currentProduct, 
-  onProductFound, 
-  searchHistory, 
-  onSelectProduct, 
-  clearHistory,
-  maxHistoryItems,
-  onChangeMaxItems
+const ProductScanner: React.FC<ProductScannerProps> = ({
+  onProductFound,
+  clearInputOnScanSuccess = true // Default to true if prop not provided or undefined
 }) => {
+  const [productId, setProductId] = useState<string>('');
+  const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleSearch = async () => {
+    const trimmedId = productId.trim();
+    if (!trimmedId) {
+      return;
+    }
+    const wasScanModeActive = isScanning;
+    setIsSearching(true);
+
+    try {
+      const productFound = await onProductFound(trimmedId);
+      // This condition correctly uses the prop now
+      if (productFound && wasScanModeActive && clearInputOnScanSuccess) {
+        setProductId('');
+      }
+    } catch (error: any) {
+      console.error("Error during product lookup:", error);
+       toast({
+         title: "Search Error",
+         description: error.message || "An unexpected error occurred during the search.",
+         variant: "destructive",
+       });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleScanMode = () => {
+    setIsScanning(prev => !prev);
+    if (!isScanning && inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (productId.trim().length > 0 && !isSearching) {
+        handleSearch();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId]);
+
+
   return (
-    <div>
-      <ProductScanner onProductFound={onProductFound} />
-      
-      {currentProduct ? (
-        <div className="mt-6">
-          <ProductDetails product={currentProduct} />
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1">
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder={isScanning ? "Scan barcode..." : "Enter product ID..."}
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+            className={`pr-10 ${isScanning ? 'border-factory-teal animate-pulse-light' : ''}`}
+            disabled={isSearching}
+            autoComplete="off"
+          />
+          {isScanning && (
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+              <Barcode className="h-4 w-4 text-factory-teal" />
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="mt-10 text-center p-10 bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="text-5xl mb-4">📦</div>
-          <h2 className="text-xl font-semibold text-factory-blue-dark mb-2">No Product Selected</h2>
-          <p className="text-factory-gray">
-            Enter a product ID in the search box or scan a product barcode to view its details.
-          </p>
+        <Button
+          variant={isScanning ? "default" : "outline"}
+          className={isScanning ? "bg-factory-teal hover:bg-factory-blue" : ""}
+          onClick={handleScanMode}
+          disabled={isSearching}
+        >
+          <Barcode className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {isScanning && (
+        <div className="flex items-center p-2 bg-blue-50 rounded text-sm text-blue-800 border border-blue-200">
+          <AlertCircle className="h-4 w-4 text-factory-teal mr-2 flex-shrink-0" />
+          <p>Scan mode active. Input field will clear automatically after successful scan.</p>
         </div>
       )}
-      
-      <SearchHistory 
-        history={searchHistory} 
-        onSelectProduct={onSelectProduct}
-        clearHistory={clearHistory}
-        maxHistoryItems={maxHistoryItems}
-        onChangeMaxItems={onChangeMaxItems}
-      />
     </div>
   );
 };
 
-export default SearchPage;
+export default ProductScanner;

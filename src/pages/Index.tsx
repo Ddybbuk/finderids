@@ -31,13 +31,15 @@ const Index = () => {
     saveHistoryToLocalStorage();
   }, [searchHistory, maxHistoryItems]);
 
-  const handleProductFound = async (productId: string) => {
-    const product = await findProductById(productId);
+  const handleProductFound = async (productId: string): Promise<boolean> => {
+    const product = await findProductById(productId); // findProductById is already async
     if (product) {
       setCurrentProduct(product);
       // Switch to search tab when a product is found
       setActiveTab("search");
+      return true; // Indicate success
     }
+    return false; // Indicate failure (product not found)
   };
 
   const handleSelectFromHistory = (product: Product) => {
