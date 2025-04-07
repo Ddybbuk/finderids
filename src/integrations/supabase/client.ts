@@ -8,4 +8,4 @@ const NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJp
 
 // Create a more flexible client that doesn't enforce strict typing
 // This allows us to use tables that might not be defined in types.ts
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
