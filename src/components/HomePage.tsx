@@ -9,9 +9,9 @@ type HomePageProps = {
 const HomePage: React.FC<HomePageProps> = ({ onNavigateToSearch }) => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Degas Information Finder</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Cell Information Finder</h2>
       <p className="text-center text-gray-600 mb-6">
-        Search for information in the Degas table by entering ID codes. The system will search for exact and partial matches.
+        Search for information in the Cell table by entering ID codes. The system will search for exact and partial matches.
       </p>
       
       <div className="bg-blue-50 rounded-md p-4 mb-6">
