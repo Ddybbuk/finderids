@@ -1,15 +1,23 @@
-
+// src/components/ProductScanner.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Barcode, AlertCircle, Info } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import { Search, Barcode, AlertCircle } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast"; // Or correct path to use-toast
 
+// --- MODIFICATION START ---
 type ProductScannerProps = {
-  onProductFound: (productId: string) => void;
+  onProductFound: (productId: string) => Promise<boolean>; // Existing prop
+  clearInputOnScanSuccess?: boolean; // <<< --- ADD THIS LINE ---
+                                      // Using '?' makes it optional, which is good practice
+                                      // especially since we provide a default value below.
 };
+// --- MODIFICATION END ---
 
-const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
+const ProductScanner: React.FC<ProductScannerProps> = ({
+  onProductFound,
+  clearInputOnScanSuccess = true // Default to true if prop not provided or undefined
+}) => {
   const [productId, setProductId] = useState<string>('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -17,27 +25,26 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
   const { toast } = useToast();
 
   const handleSearch = async () => {
-    if (!productId.trim()) {
-      toast({
-        title: "Please enter an ID",
-        description: "Enter a pallet ID to search for",
-        variant: "destructive",
-      });
+    const trimmedId = productId.trim();
+    if (!trimmedId) {
       return;
     }
-
+    const wasScanModeActive = isScanning;
     setIsSearching(true);
-    
+
     try {
-      // We'll let the parent component handle the actual searching
-      onProductFound(productId.trim());
+      const productFound = await onProductFound(trimmedId);
+      // This condition correctly uses the prop now
+      if (productFound && wasScanModeActive && clearInputOnScanSuccess) {
+        setProductId('');
+      }
     } catch (error: any) {
-      toast({
-        title: "Error searching product",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-      console.error("Search error:", error);
+      console.error("Error during product lookup:", error);
+       toast({
+         title: "Search Error",
+         description: error.message || "An unexpected error occurred during the search.",
+         variant: "destructive",
+       });
     } finally {
       setIsSearching(false);
     }
@@ -45,22 +52,21 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
 
   const handleScanMode = () => {
     setIsScanning(prev => !prev);
-    // Focus on input when scan mode is enabled
     if (!isScanning && inputRef.current) {
       inputRef.current.focus();
     }
   };
 
-  // Auto-search when user types or pastes text (with small debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (productId.trim().length > 3) { // Only search if at least 4 characters
+      if (productId.trim().length > 0 && !isSearching) {
         handleSearch();
       }
-    }, 500); // Longer debounce time for better UX
-    
+    }, 300);
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
+
 
   return (
     <div className="flex flex-col space-y-4">
@@ -69,7 +75,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
           <Input
             ref={inputRef}
             type="text"
-            placeholder={isScanning ? "Scan barcode..." : "Enter pallet ID..."}
+            placeholder={isScanning ? "Scan barcode..." : "Enter product ID..."}
             value={productId}
             onChange={(e) => setProductId(e.target.value)}
             className={`pr-10 ${isScanning ? 'border-factory-teal animate-pulse-light' : ''}`}
@@ -90,26 +96,14 @@ const ProductScanner: React.FC<ProductScannerProps> = ({ onProductFound }) => {
         >
           <Barcode className="h-4 w-4" />
         </Button>
-        <Button
-          onClick={handleSearch}
-          disabled={isSearching || !productId.trim()}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
       </div>
-      
+
       {isScanning && (
-        <div className="flex items-center p-2 bg-blue-50 rounded text-sm">
-          <AlertCircle className="h-4 w-4 text-factory-teal mr-2" />
-          <p>Scan mode is active. Scanned barcodes will be processed automatically.</p>
+        <div className="flex items-center p-2 bg-blue-50 rounded text-sm text-blue-800 border border-blue-200">
+          <AlertCircle className="h-4 w-4 text-factory-teal mr-2 flex-shrink-0" />
+          <p>Scan mode active. Input field will clear automatically after successful scan.</p>
         </div>
       )}
-      
-      <div className="flex items-center p-2 bg-gray-50 rounded text-sm">
-        <Info className="h-4 w-4 text-gray-500 mr-2" />
-        <p>Try searching by exact ID (e.g., "PTQF31083") or partial ID (e.g., "31083")</p>
-      </div>
     </div>
   );
 };
