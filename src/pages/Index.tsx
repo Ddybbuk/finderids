@@ -1,4 +1,4 @@
-
+// src/pages/Index.tsx
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/data/products';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +13,7 @@ const Index = () => {
   const {
     findProductById,
     searchHistory,
-    setSearchHistory,
+    setSearchHistory, // Keep if needed elsewhere, but useProductHistory handles updates
     clearHistory,
     maxHistoryItems,
     changeMaxHistoryItems,
@@ -24,13 +24,16 @@ const Index = () => {
   useEffect(() => {
     // Load search history from localStorage on component mount
     loadHistoryFromLocalStorage();
-  }, []);
+  }, [loadHistoryFromLocalStorage]); // Add dependency
 
   useEffect(() => {
     // Save search history to localStorage whenever it changes
+    // Note: useProductHistory hook already handles saving internally when history/maxItems change.
+    // This might be redundant unless you have specific reasons.
     saveHistoryToLocalStorage();
-  }, [searchHistory, maxHistoryItems]);
+  }, [searchHistory, maxHistoryItems, saveHistoryToLocalStorage]); // Add dependency
 
+  // --- MODIFICATION START ---
   const handleProductFound = async (productId: string): Promise<boolean> => {
     const product = await findProductById(productId); // findProductById is already async
     if (product) {
@@ -41,6 +44,7 @@ const Index = () => {
     }
     return false; // Indicate failure (product not found)
   };
+  // --- MODIFICATION END ---
 
   const handleSelectFromHistory = (product: Product) => {
     setCurrentProduct(product);
@@ -59,7 +63,7 @@ const Index = () => {
           <p className="text-factory-gray-light">Scan or search for product details</p>
         </div>
       </header>
-      
+
       <main className="container mx-auto p-6 max-w-4xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -72,20 +76,22 @@ const Index = () => {
               Search
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="home" className="mt-0">
             <HomePage onNavigateToSearch={navigateToSearch} />
           </TabsContent>
-          
+
           <TabsContent value="search" className="mt-0">
-            <SearchPage 
+            <SearchPage
               currentProduct={currentProduct}
-              onProductFound={handleProductFound}
+              onProductFound={handleProductFound} // Pass the modified async function
               searchHistory={searchHistory}
               onSelectProduct={handleSelectFromHistory}
               clearHistory={clearHistory}
               maxHistoryItems={maxHistoryItems}
               onChangeMaxItems={changeMaxHistoryItems}
+              // Optionally pass clear setting if needed later
+              // clearInputOnScanSuccess={true}
             />
           </TabsContent>
         </Tabs>
@@ -94,4 +100,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Index; // Ensure export default is present
