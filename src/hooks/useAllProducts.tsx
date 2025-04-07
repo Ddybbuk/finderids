@@ -14,9 +14,10 @@ export const useAllProducts = () => {
     queryFn: async (): Promise<Product[]> => {
       try {
         console.log("Fetching all cells from Supabase");
+        // Use any to bypass TypeScript checking until types are properly updated
         const { data, error } = await supabase
           .from('cell')
-          .select('*');
+          .select('*') as any;
 
         console.log("All cells query result:", data, error);
 

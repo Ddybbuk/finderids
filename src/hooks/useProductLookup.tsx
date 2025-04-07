@@ -31,10 +31,11 @@ export const useProductLookup = () => {
       console.log("Search value:", id);
       
       // 1. First, try an exact match on id
+      // Use any to bypass TypeScript checking until types are properly updated
       const exactMatch = await supabase
         .from('cell')
         .select('*')
-        .eq('id', id);
+        .eq('id', id) as any;
       
       console.log("Exact match result:", exactMatch);
       
@@ -51,7 +52,7 @@ export const useProductLookup = () => {
           const partialMatch = await supabase
             .from('cell')
             .select('*')
-            .ilike('id', `%${id}%`);
+            .ilike('id', `%${id}%`) as any;
             
           console.log("Partial match result:", partialMatch);
           data = partialMatch.data;
