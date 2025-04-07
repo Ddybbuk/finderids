@@ -13,13 +13,14 @@ export const useAllProducts = () => {
     queryKey: ['products'],
     queryFn: async (): Promise<Product[]> => {
       try {
-        console.log("Fetching all cells from Supabase");
-        // Use any to bypass TypeScript checking until types are properly updated
+        console.log("Fetching all records from degas table");
+        
+        // We need to use a more generic approach to bypass TypeScript limitations
         const { data, error } = await supabase
-          .from('cell')
+          .from('degas')
           .select('*') as any;
 
-        console.log("All cells query result:", data, error);
+        console.log("Degas table query result:", data, error);
 
         if (error) {
           throw error;
@@ -30,18 +31,18 @@ export const useAllProducts = () => {
         }
         
         toast({
-          title: "No products found",
-          description: "There are no cells in the database",
+          title: "No records found",
+          description: "There are no records in the degas table",
           variant: "destructive",
         });
         return [];
       } catch (error: any) {
         toast({
-          title: "Failed to fetch products",
+          title: "Failed to fetch records",
           description: error.message || "Something went wrong",
           variant: "destructive",
         });
-        console.error("Error fetching products:", error);
+        console.error("Error fetching records:", error);
         return [];
       }
     }

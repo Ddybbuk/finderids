@@ -21,7 +21,7 @@ export const useProductLookup = () => {
   // Fetch product by ID
   const findProductById = async (id: string): Promise<Product | undefined> => {
     try {
-      console.log("Searching for cell with ID:", id);
+      console.log("Searching for record with ID:", id);
       
       // Try multiple search approaches
       let data;
@@ -31,9 +31,9 @@ export const useProductLookup = () => {
       console.log("Search value:", id);
       
       // 1. First, try an exact match on id
-      // Use any to bypass TypeScript checking until types are properly updated
+      // Use any to bypass TypeScript checking
       const exactMatch = await supabase
-        .from('cell')
+        .from('degas')
         .select('*')
         .eq('id', id) as any;
       
@@ -50,7 +50,7 @@ export const useProductLookup = () => {
         if (!data || data.length === 0) {
           console.log("Trying with partial match (ilike):", `%${id}%`);
           const partialMatch = await supabase
-            .from('cell')
+            .from('degas')
             .select('*')
             .ilike('id', `%${id}%`) as any;
             
@@ -78,19 +78,19 @@ export const useProductLookup = () => {
       }
       
       toast({
-        title: "Product not found",
-        description: `No product found with ID: ${id}`,
+        title: "Record not found",
+        description: `No record found with ID: ${id}`,
         variant: "destructive",
       });
       
       return undefined;
     } catch (error: any) {
       toast({
-        title: "Error finding product",
+        title: "Error finding record",
         description: error.message || "Something went wrong",
         variant: "destructive",
       });
-      console.error("Error finding product:", error);
+      console.error("Error finding record:", error);
       return undefined;
     }
   };
