@@ -9,9 +9,9 @@ type HomePageProps = {
 const HomePage: React.FC<HomePageProps> = ({ onNavigateToSearch }) => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Pallet Information Finder</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Cell Information Finder</h2>
       <p className="text-center text-gray-600 mb-6">
-        Search for pallets by entering their ID code or RFID. The system will search for exact and partial matches.
+        Search for cell information by entering their ID code. The system will search for exact and partial matches.
       </p>
       
       <div className="bg-blue-50 rounded-md p-4 mb-6">
@@ -20,23 +20,22 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToSearch }) => {
           <div>
             <h3 className="font-medium text-blue-700">Search Tips</h3>
             <ul className="list-disc list-inside text-sm text-blue-600 mt-1">
-              <li>Use the exact Pallet ID (like PTQF31083) for best results</li>
-              <li>You can also search by RFID (like PTACFE9464)</li>
+              <li>Use the exact Cell ID for best results</li>
               <li>Search is not case sensitive</li>
-              <li>You can search with just a part of the ID (like 31083)</li>
-              <li>The system will try to find matches in both PalletID and RFID fields</li>
+              <li>You can search with just a part of the ID</li>
+              <li>The system will try to find matches in the ID field</li>
             </ul>
           </div>
         </div>
       </div>
       
       <div className="mt-6 p-4 border border-yellow-200 bg-yellow-50 rounded-md">
-        <h3 className="font-medium text-yellow-700 mb-2">Example Pallet IDs to try:</h3>
+        <h3 className="font-medium text-yellow-700 mb-2">Example Cell IDs to try:</h3>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="p-2 bg-yellow-100 rounded">PTQF31083</div>
-          <div className="p-2 bg-yellow-100 rounded">PTQF31082</div>
-          <div className="p-2 bg-yellow-100 rounded">PTS3F30094</div>
-          <div className="p-2 bg-yellow-100 rounded">PTQF33122</div>
+          <div className="p-2 bg-yellow-100 rounded">C001</div>
+          <div className="p-2 bg-yellow-100 rounded">C002</div>
+          <div className="p-2 bg-yellow-100 rounded">C003</div>
+          <div className="p-2 bg-yellow-100 rounded">C004</div>
         </div>
       </div>
       

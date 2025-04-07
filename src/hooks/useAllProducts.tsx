@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/data/products';
-import { convertSupabasePallet } from '@/utils/productConverters';
+import { convertSupabaseCell } from '@/utils/productConverters';
 
 // Hook to fetch all products
 export const useAllProducts = () => {
@@ -13,24 +13,24 @@ export const useAllProducts = () => {
     queryKey: ['products'],
     queryFn: async (): Promise<Product[]> => {
       try {
-        console.log("Fetching all pallets from Supabase");
+        console.log("Fetching all cells from Supabase");
         const { data, error } = await supabase
-          .from('pallet')
+          .from('cell')
           .select('*');
 
-        console.log("All pallets query result:", data, error);
+        console.log("All cells query result:", data, error);
 
         if (error) {
           throw error;
         }
 
         if (data && data.length > 0) {
-          return data.map(convertSupabasePallet);
+          return data.map(convertSupabaseCell);
         }
         
         toast({
           title: "No products found",
-          description: "There are no pallets in the database",
+          description: "There are no cells in the database",
           variant: "destructive",
         });
         return [];
