@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/data/products';
-import { convertSupabaseCell } from '@/utils/productConverters';
+import { convertSupabasePallet } from '@/utils/productConverters';
 
 // Hook to fetch all products
 export const useAllProducts = () => {
@@ -13,24 +13,24 @@ export const useAllProducts = () => {
     queryKey: ['products'],
     queryFn: async (): Promise<Product[]> => {
       try {
-        console.log("Fetching all records from degas table");
+        console.log("Fetching all records from pallet table");
         
-        // Use a more generic client approach to bypass type restrictions
-        const { data, error } = await supabase.from('degas' as any).select('*');
+        // Use the pallet table instead of degas
+        const { data, error } = await supabase.from('pallet').select('*');
 
-        console.log("Degas table query result:", data, error);
+        console.log("Pallet table query result:", data, error);
 
         if (error) {
           throw error;
         }
 
         if (data && data.length > 0) {
-          return data.map(convertSupabaseCell);
+          return data.map(convertSupabasePallet);
         }
         
         toast({
           title: "No records found",
-          description: "There are no records in the degas table",
+          description: "There are no records in the pallet table",
           variant: "destructive",
         });
         return [];
