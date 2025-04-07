@@ -31,11 +31,11 @@ export const useProductLookup = () => {
       console.log("Search value:", id);
       
       // 1. First, try an exact match on id
-      // Use any to bypass TypeScript checking
+      // Use the 'as any' type assertion to bypass TypeScript checking
       const exactMatch = await supabase
-        .from('degas')
+        .from('degas' as any)
         .select('*')
-        .eq('id', id) as any;
+        .eq('id', id);
       
       console.log("Exact match result:", exactMatch);
       
@@ -50,9 +50,9 @@ export const useProductLookup = () => {
         if (!data || data.length === 0) {
           console.log("Trying with partial match (ilike):", `%${id}%`);
           const partialMatch = await supabase
-            .from('degas')
+            .from('degas' as any)
             .select('*')
-            .ilike('id', `%${id}%`) as any;
+            .ilike('id', `%${id}%`);
             
           console.log("Partial match result:", partialMatch);
           data = partialMatch.data;

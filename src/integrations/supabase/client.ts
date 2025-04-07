@@ -6,7 +6,6 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://zmgwbyumefihqosnvwry.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptZ3dieXVtZWZpaHFvc252d3J5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5Mzg4MjQsImV4cCI6MjA1OTUxNDgyNH0.6lxeZqPPf8inmwJlhYyGJoLy6j9WWSyTJSw1iT9YXyY";
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Create a more flexible client that doesn't enforce strict typing
+// This allows us to use tables that might not be defined in types.ts
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);

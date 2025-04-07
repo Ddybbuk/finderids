@@ -15,10 +15,8 @@ export const useAllProducts = () => {
       try {
         console.log("Fetching all records from degas table");
         
-        // We need to use a more generic approach to bypass TypeScript limitations
-        const { data, error } = await supabase
-          .from('degas')
-          .select('*') as any;
+        // Use a more generic client approach to bypass type restrictions
+        const { data, error } = await supabase.from('degas' as any).select('*');
 
         console.log("Degas table query result:", data, error);
 
