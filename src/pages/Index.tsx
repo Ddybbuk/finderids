@@ -1,3 +1,4 @@
+
 // src/pages/Index.tsx
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/data/products';
@@ -13,7 +14,7 @@ const Index = () => {
   const {
     findProductById,
     searchHistory,
-    setSearchHistory, // Keep if needed elsewhere, but useProductHistory handles updates
+    setSearchHistory,
     clearHistory,
     maxHistoryItems,
     changeMaxHistoryItems,
@@ -28,12 +29,9 @@ const Index = () => {
 
   useEffect(() => {
     // Save search history to localStorage whenever it changes
-    // Note: useProductHistory hook already handles saving internally when history/maxItems change.
-    // This might be redundant unless you have specific reasons.
     saveHistoryToLocalStorage();
   }, [searchHistory, maxHistoryItems, saveHistoryToLocalStorage]); // Add dependency
 
-  // --- MODIFICATION START ---
   const handleProductFound = async (productId: string): Promise<boolean> => {
     const product = await findProductById(productId); // findProductById is already async
     if (product) {
@@ -44,7 +42,6 @@ const Index = () => {
     }
     return false; // Indicate failure (product not found)
   };
-  // --- MODIFICATION END ---
 
   const handleSelectFromHistory = (product: Product) => {
     setCurrentProduct(product);
@@ -90,8 +87,6 @@ const Index = () => {
               clearHistory={clearHistory}
               maxHistoryItems={maxHistoryItems}
               onChangeMaxItems={changeMaxHistoryItems}
-              // Optionally pass clear setting if needed later
-              // clearInputOnScanSuccess={true}
             />
           </TabsContent>
         </Tabs>
@@ -100,4 +95,4 @@ const Index = () => {
   );
 };
 
-export default Index; // Ensure export default is present
+export default Index;

@@ -1,3 +1,4 @@
+
 // src/components/SearchPage.tsx
 import React from 'react';
 import { Product } from '@/data/products';
@@ -7,16 +8,12 @@ import SearchHistory from '@/components/SearchHistory';
 
 type SearchPageProps = {
   currentProduct: Product | null;
-  // --- MODIFICATION START ---
   onProductFound: (productId: string) => Promise<boolean>; // Expecting a promise returning boolean
-  // --- MODIFICATION END ---
   searchHistory: Product[];
   onSelectProduct: (product: Product) => void;
   clearHistory: () => void;
   maxHistoryItems: number;
   onChangeMaxItems: (newMax: number) => void;
-  // Optionally receive from parent if configurable
-  // clearInputOnScanSuccess?: boolean;
 };
 
 const SearchPage: React.FC<SearchPageProps> = ({
@@ -27,17 +24,13 @@ const SearchPage: React.FC<SearchPageProps> = ({
   clearHistory,
   maxHistoryItems,
   onChangeMaxItems,
-  // clearInputOnScanSuccess = true // Default value if received as prop
 }) => {
   return (
     <div>
-      {/* --- MODIFICATION START --- */}
       <ProductScanner
         onProductFound={onProductFound}
-        clearInputOnScanSuccess={true} // Enable the feature by default
+        clearInputOnScanSuccess={true} // Enable clearing the input field after a successful scan
       />
-      {/* --- MODIFICATION END --- */}
-
 
       {currentProduct ? (
         <div className="mt-6">
@@ -64,4 +57,4 @@ const SearchPage: React.FC<SearchPageProps> = ({
   );
 };
 
-export default SearchPage; // Ensure export default is present
+export default SearchPage;

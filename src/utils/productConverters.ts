@@ -25,34 +25,3 @@ export const convertSupabaseCell = (cellData: any): Product => {
     specifications: specifications
   };
 };
-
-// Convert pallet table data to our app's Product type
-export const convertSupabasePallet = (palletData: any): Product => {
-  console.log("Raw pallet data to convert:", palletData);
-  
-  // Create a specifications object with all columns that aren't explicitly mapped
-  const specifications: Record<string, string | number> = {};
-  
-  // Add all fields from palletData to specifications except ones we explicitly handle
-  Object.entries(palletData).forEach(([key, value]) => {
-    if (!['id', 'PalletID', 'FIFO', 'Dzien pracy', 'RFID'].includes(key) && value !== null) {
-      specifications[key] = value as string | number;
-    }
-  });
-
-  return {
-    id: palletData.PalletID || `ID-${palletData.id.toString()}`,
-    name: `Pallet ${palletData.PalletID || palletData.id?.toString() || ''}`,
-    category: "Pallet",
-    location: palletData["Dzien pracy"] || "",
-    status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
-    quantity: palletData.FIFO || 0,
-    lastUpdated: new Date().toISOString().split('T')[0],
-    specifications: {
-      ...specifications,
-      RFID: palletData.RFID || "N/A",
-      FIFO: palletData.FIFO || 0,
-      "Work Day": palletData["Dzien pracy"] || "N/A"
-    }
-  };
-};

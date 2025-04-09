@@ -1,3 +1,4 @@
+
 // src/components/ProductScanner.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
@@ -5,18 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Search, Barcode, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"; // Or correct path to use-toast
 
-// --- MODIFICATION START ---
 type ProductScannerProps = {
-  onProductFound: (productId: string) => Promise<boolean>; // Existing prop
-  clearInputOnScanSuccess?: boolean; // <<< --- ADD THIS LINE ---
-                                      // Using '?' makes it optional, which is good practice
-                                      // especially since we provide a default value below.
+  onProductFound: (productId: string) => Promise<boolean>; // Return success status
+  clearInputOnScanSuccess?: boolean; // Optional prop with default value
 };
-// --- MODIFICATION END ---
 
 const ProductScanner: React.FC<ProductScannerProps> = ({
   onProductFound,
-  clearInputOnScanSuccess = true // Default to true if prop not provided or undefined
+  clearInputOnScanSuccess = true // Default to true if prop not provided
 }) => {
   const [productId, setProductId] = useState<string>('');
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -34,7 +31,7 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
 
     try {
       const productFound = await onProductFound(trimmedId);
-      // This condition correctly uses the prop now
+      // Clear input on successful scan if in scan mode and clearInputOnScanSuccess is true
       if (productFound && wasScanModeActive && clearInputOnScanSuccess) {
         setProductId('');
       }
