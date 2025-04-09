@@ -14,6 +14,7 @@ type SearchPageProps = {
   clearHistory: () => void;
   maxHistoryItems: number;
   onChangeMaxItems: (newMax: number) => void;
+  autoSearch?: boolean;
 };
 
 const SearchPage: React.FC<SearchPageProps> = ({
@@ -24,12 +25,14 @@ const SearchPage: React.FC<SearchPageProps> = ({
   clearHistory,
   maxHistoryItems,
   onChangeMaxItems,
+  autoSearch = true,
 }) => {
   return (
     <div>
       <ProductScanner
         onProductFound={onProductFound}
         clearInputOnScanSuccess={true} // Enable clearing the input field after a successful scan
+        autoSearch={autoSearch} // Pass the autoSearch prop
       />
 
       {currentProduct ? (

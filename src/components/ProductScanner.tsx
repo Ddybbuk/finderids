@@ -1,133 +1,156 @@
 
-// src/components/ProductScanner.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Barcode, AlertCircle } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect, useRef } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useDebouncedCallback } from '@/hooks/useDebounce';
 
 type ProductScannerProps = {
-  onProductFound: (productId: string) => Promise<boolean>; // Return success status
-  clearInputOnScanSuccess?: boolean; // Optional prop with default value
+  onProductFound: (productId: string) => Promise<boolean>;
+  clearInputOnScanSuccess?: boolean;
+  autoSearch?: boolean;
 };
 
-const ProductScanner: React.FC<ProductScannerProps> = ({
+const ProductScanner: React.FC<ProductScannerProps> = ({ 
   onProductFound,
-  clearInputOnScanSuccess = true // Default to true if prop not provided
+  clearInputOnScanSuccess = false,
+  autoSearch = true  // Default to auto search mode
 }) => {
   const [productId, setProductId] = useState<string>('');
-  const [isScanning, setIsScanning] = useState<boolean>(false);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Debounce the search to prevent too many requests
+  const debouncedSearch = useDebouncedCallback(async (searchTerm: string) => {
+    if (searchTerm.trim() === '') return;
+    
+    setIsLoading(true);
+    try {
+      const success = await onProductFound(searchTerm);
+      if (success && clearInputOnScanSuccess) {
+        setProductId('');
+        // Refocus the input after clearing
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }
+    } catch (error) {
+      console.error("Error in product search:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, 600); // 600ms debounce delay
+  
+  // Handle auto search when productId changes
+  useEffect(() => {
+    if (autoSearch && productId && productId.trim() !== '') {
+      debouncedSearch(productId);
+    }
+  }, [productId, autoSearch, debouncedSearch]);
 
-  const handleSearch = async () => {
-    const trimmedId = productId.trim();
-    if (!trimmedId) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!productId || productId.trim() === '') {
+      toast({
+        title: "Input required",
+        description: "Please enter a valid product ID or scan a barcode.",
+        variant: "destructive",
+      });
       return;
     }
     
-    setIsSearching(true);
-
+    setIsLoading(true);
+    
     try {
-      console.log("Searching for product with ID:", trimmedId);
-      const productFound = await onProductFound(trimmedId);
+      const success = await onProductFound(productId);
       
-      console.log("Product found status:", productFound, "isScanning:", isScanning, "clearInputOnScanSuccess:", clearInputOnScanSuccess);
-      
-      // Clear input on successful scan if enabled and in scan mode or product was found
-      if (productFound && (isScanning || clearInputOnScanSuccess)) {
-        console.log("Clearing input field after successful scan");
+      if (success && clearInputOnScanSuccess) {
         setProductId('');
+        // Refocus the input after clearing
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
       }
-    } catch (error: any) {
-      console.error("Error during product lookup:", error);
-      toast({
-        title: "Search Error",
-        description: error.message || "An unexpected error occurred during the search.",
-        variant: "destructive",
-      });
+    } catch (error) {
+      console.error("Error in product lookup:", error);
     } finally {
-      setIsSearching(false);
+      setIsLoading(false);
     }
   };
 
+  // Handle keyboard events - clear on escape, submit on enter
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // If Enter key is pressed, trigger search
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
+    if (e.key === 'Escape') {
+      setProductId('');
+    } else if (e.key === 'Enter' && !autoSearch) {
+      handleSubmit(e);
     }
   };
-
-  const handleScanMode = () => {
-    setIsScanning(prev => !prev);
-    if (!isScanning && inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  // In scan mode, automatically search after a brief delay when input changes
-  useEffect(() => {
-    if (!isScanning || productId.trim() === '') return;
-    
-    const timer = setTimeout(() => {
-      if (!isSearching && productId.trim().length > 0) {
-        handleSearch();
-      }
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [productId, isScanning]);
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={isScanning ? "Scan barcode..." : "Enter product ID..."}
-            value={productId}
-            onChange={(e) => setProductId(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className={`pr-10 ${isScanning ? 'border-factory-teal animate-pulse-light' : ''}`}
-            disabled={isSearching}
-            autoComplete="off"
-            autoFocus={isScanning}
-          />
-          {isScanning && (
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <Barcode className="h-4 w-4 text-factory-teal" />
-            </div>
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-grow">
+            <Input
+              ref={inputRef}
+              type="text" 
+              placeholder="Enter product ID or scan barcode"
+              className="pr-10 h-12 text-lg"
+              value={productId}
+              onChange={(e) => setProductId(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              disabled={isLoading}
+            />
+            {productId && (
+              <button 
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={() => {
+                  setProductId('');
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}
+                aria-label="Clear input"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          
+          {!autoSearch && (
+            <Button 
+              type="submit" 
+              className="min-w-[100px] h-12 text-lg"
+              disabled={isLoading || !productId}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-opacity-50 border-t-white rounded-full"></div>
+                </div>
+              ) : (
+                <>
+                  <Search className="mr-2 w-5 h-5" />
+                  Search
+                </>
+              )}
+            </Button>
           )}
         </div>
-        <Button
-          type="button"
-          onClick={isScanning ? handleScanMode : handleSearch}
-          variant={isScanning ? "default" : "outline"}
-          className={isScanning ? "bg-factory-teal hover:bg-factory-blue" : ""}
-          disabled={isSearching || (productId.trim() === '' && !isScanning)}
-        >
-          {isScanning ? <Barcode className="h-4 w-4" /> : <Search className="h-4 w-4" />}
-        </Button>
-        <Button
-          type="button"
-          variant={isScanning ? "default" : "outline"}
-          className={isScanning ? "bg-factory-teal hover:bg-factory-blue" : ""}
-          onClick={handleScanMode}
-          disabled={isSearching}
-        >
-          <Barcode className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {isScanning && (
-        <div className="flex items-center p-2 bg-blue-50 rounded text-sm text-blue-800 border border-blue-200">
-          <AlertCircle className="h-4 w-4 text-factory-teal mr-2 flex-shrink-0" />
-          <p>Scan mode active. Input field will clear automatically after successful scan.</p>
+        
+        <div className="text-sm text-factory-gray">
+          {autoSearch ? (
+            <span>Type or scan to automatically search for products</span>
+          ) : (
+            <span>Enter a product ID, barcode or keyword and click Search</span>
+          )}
         </div>
-      )}
+      </form>
     </div>
   );
 };

@@ -25,3 +25,31 @@ export const convertSupabaseCell = (cellData: any): Product => {
     specifications: specifications
   };
 };
+
+// Convert degas table data to our app's Product type
+export const convertSupabaseDegas = (degasData: any): Product => {
+  // Create a specifications object with all columns that aren't explicitly mapped
+  const specifications: Record<string, string | number> = {};
+  
+  // Add all fields from degasData to specifications except ones we explicitly handle
+  Object.entries(degasData).forEach(([key, value]) => {
+    if (!['id', 'PalletID', 'RFID', 'FIFO', 'Dzien pracy'].includes(key) && value !== null) {
+      specifications[key] = value as string | number;
+    }
+  });
+
+  return {
+    id: degasData.id?.toString() || "unknown-id",
+    name: degasData.PalletID || "Unknown Pallet",
+    category: "Degas", 
+    location: degasData["Dzien pracy"] || "",
+    status: "in-stock" as "in-stock" | "low-stock" | "out-of-stock",
+    quantity: degasData.FIFO || 0,
+    lastUpdated: new Date().toISOString().split('T')[0],
+    specifications: {
+      ...specifications,
+      "RFID": degasData.RFID || "",
+      "FIFO": degasData.FIFO || 0,
+    }
+  };
+};

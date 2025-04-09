@@ -1,10 +1,25 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Product } from '@/data/products';
 
 export const useProductHistory = () => {
   const [searchHistory, setSearchHistory] = useState<Product[]>([]);
   const [maxHistoryItems, setMaxHistoryItems] = useState<number>(20); // Default to 20 items
+  
+  // Load max history items from localStorage on initialization
+  useEffect(() => {
+    try {
+      const savedMaxItems = localStorage.getItem('productSearchHistoryMaxItems');
+      if (savedMaxItems) {
+        const parsedMaxItems = parseInt(savedMaxItems, 10);
+        if (!isNaN(parsedMaxItems) && parsedMaxItems !== maxHistoryItems) {
+          setMaxHistoryItems(parsedMaxItems);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load max history items from localStorage:', error);
+    }
+  }, []);
 
   // Update search history with a new product
   const addToHistory = useCallback((product: Product) => {
@@ -47,7 +62,7 @@ export const useProductHistory = () => {
       if (savedMaxItems) {
         try {
           const parsedMaxItems = parseInt(savedMaxItems, 10);
-          if (!isNaN(parsedMaxItems) && parsedMaxItems !== maxHistoryItems) {
+          if (!isNaN(parsedMaxItems)) {
             setMaxHistoryItems(parsedMaxItems);
           }
         } catch (error) {
