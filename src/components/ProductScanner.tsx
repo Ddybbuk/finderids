@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Barcode, AlertCircle } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast"; // Or correct path to use-toast
+import { useToast } from "@/hooks/use-toast";
 
 type ProductScannerProps = {
   onProductFound: (productId: string) => Promise<boolean>; // Return success status
@@ -26,24 +26,37 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     if (!trimmedId) {
       return;
     }
-    const wasScanModeActive = isScanning;
+    
     setIsSearching(true);
 
     try {
+      console.log("Searching for product with ID:", trimmedId);
       const productFound = await onProductFound(trimmedId);
-      // Clear input on successful scan if in scan mode and clearInputOnScanSuccess is true
-      if (productFound && wasScanModeActive && clearInputOnScanSuccess) {
+      
+      console.log("Product found status:", productFound, "isScanning:", isScanning, "clearInputOnScanSuccess:", clearInputOnScanSuccess);
+      
+      // Clear input on successful scan if enabled and in scan mode or product was found
+      if (productFound && (isScanning || clearInputOnScanSuccess)) {
+        console.log("Clearing input field after successful scan");
         setProductId('');
       }
     } catch (error: any) {
       console.error("Error during product lookup:", error);
-       toast({
-         title: "Search Error",
-         description: error.message || "An unexpected error occurred during the search.",
-         variant: "destructive",
-       });
+      toast({
+        title: "Search Error",
+        description: error.message || "An unexpected error occurred during the search.",
+        variant: "destructive",
+      });
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // If Enter key is pressed, trigger search
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
     }
   };
 
@@ -54,16 +67,18 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
     }
   };
 
+  // In scan mode, automatically search after a brief delay when input changes
   useEffect(() => {
+    if (!isScanning || productId.trim() === '') return;
+    
     const timer = setTimeout(() => {
-      if (productId.trim().length > 0 && !isSearching) {
+      if (!isSearching && productId.trim().length > 0) {
         handleSearch();
       }
     }, 300);
+    
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
-
+  }, [productId, isScanning]);
 
   return (
     <div className="flex flex-col space-y-4">
@@ -75,9 +90,11 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
             placeholder={isScanning ? "Scan barcode..." : "Enter product ID..."}
             value={productId}
             onChange={(e) => setProductId(e.target.value)}
+            onKeyDown={handleKeyDown}
             className={`pr-10 ${isScanning ? 'border-factory-teal animate-pulse-light' : ''}`}
             disabled={isSearching}
             autoComplete="off"
+            autoFocus={isScanning}
           />
           {isScanning && (
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -86,6 +103,16 @@ const ProductScanner: React.FC<ProductScannerProps> = ({
           )}
         </div>
         <Button
+          type="button"
+          onClick={isScanning ? handleScanMode : handleSearch}
+          variant={isScanning ? "default" : "outline"}
+          className={isScanning ? "bg-factory-teal hover:bg-factory-blue" : ""}
+          disabled={isSearching || (productId.trim() === '' && !isScanning)}
+        >
+          {isScanning ? <Barcode className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+        </Button>
+        <Button
+          type="button"
           variant={isScanning ? "default" : "outline"}
           className={isScanning ? "bg-factory-teal hover:bg-factory-blue" : ""}
           onClick={handleScanMode}

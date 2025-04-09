@@ -23,29 +23,36 @@ export const useProductLookup = () => {
     try {
       console.log("Searching for record with ID:", id);
       
-      // Try multiple search approaches
+      // Try multiple search approaches, starting with direct query
       let data;
       let error;
 
-      // First log the current search value to help with debugging
-      console.log("Search value:", id);
-      
-      const exactMatch = await supabase
+      // First try exact match on id field
+      console.log("Trying exact match on id field:", id);
+      const idMatch = await supabase
         .from('cell')
         .select('*')
-        .eq('defect type', id);
-      
-      console.log("Exact match result:", exactMatch);
-      
-      if (exactMatch.data && exactMatch.data.length > 0) {
-        console.log("Found exact match!");
-        data = exactMatch.data;
-        error = exactMatch.error;
-      } else {
-        console.log("No exact match found, trying alternative searches...");
+        .eq('id', id);
         
-        if (!data || data.length === 0) {
-          console.log("Trying with partial match (ilike):", `%${id}%`);
+      if (idMatch.data && idMatch.data.length > 0) {
+        console.log("Found match by id field!");
+        data = idMatch.data;
+        error = idMatch.error;
+      } else {
+        // Then try exact match on defect type field
+        console.log("Trying exact match on defect type field:", id);
+        const exactMatch = await supabase
+          .from('cell')
+          .select('*')
+          .eq('defect type', id);
+        
+        if (exactMatch.data && exactMatch.data.length > 0) {
+          console.log("Found exact match on defect type!");
+          data = exactMatch.data;
+          error = exactMatch.error;
+        } else {
+          // Try partial match using ilike
+          console.log("Trying partial match on defect type:", `%${id}%`);
           const partialMatch = await supabase
             .from('cell')
             .select('*')
@@ -54,6 +61,21 @@ export const useProductLookup = () => {
           console.log("Partial match result:", partialMatch);
           data = partialMatch.data;
           error = partialMatch.error;
+          
+          // If still no results, try as a number in the value field
+          if ((!data || data.length === 0) && !isNaN(Number(id))) {
+            console.log("Trying as number in value field:", Number(id));
+            const valueMatch = await supabase
+              .from('cell')
+              .select('*')
+              .eq('value', Number(id));
+              
+            console.log("Value match result:", valueMatch);
+            if (valueMatch.data && valueMatch.data.length > 0) {
+              data = valueMatch.data;
+              error = valueMatch.error;
+            }
+          }
         }
       }
 

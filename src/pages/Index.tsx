@@ -1,6 +1,6 @@
 
 // src/pages/Index.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Product } from '@/data/products';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Home, Search } from 'lucide-react';
@@ -18,28 +18,45 @@ const Index = () => {
     clearHistory,
     maxHistoryItems,
     changeMaxHistoryItems,
-    loadHistoryFromLocalStorage,
-    saveHistoryToLocalStorage
+    saveHistoryToLocalStorage,
+    loadHistoryFromLocalStorage
   } = useProductLookup();
+
+  // Memoize the loadHistoryFromLocalStorage function to avoid infinite render loop
+  const memoizedLoadHistory = useCallback(() => {
+    loadHistoryFromLocalStorage();
+  }, [loadHistoryFromLocalStorage]);
+
+  // Memoize the saveHistoryToLocalStorage function to avoid infinite render loop
+  const memoizedSaveHistory = useCallback(() => {
+    saveHistoryToLocalStorage();
+  }, [saveHistoryToLocalStorage, searchHistory, maxHistoryItems]);
 
   useEffect(() => {
     // Load search history from localStorage on component mount
-    loadHistoryFromLocalStorage();
-  }, [loadHistoryFromLocalStorage]); // Add dependency
+    memoizedLoadHistory();
+  }, [memoizedLoadHistory]);
 
   useEffect(() => {
     // Save search history to localStorage whenever it changes
-    saveHistoryToLocalStorage();
-  }, [searchHistory, maxHistoryItems, saveHistoryToLocalStorage]); // Add dependency
+    if (searchHistory.length > 0) {
+      memoizedSaveHistory();
+    }
+  }, [searchHistory, maxHistoryItems, memoizedSaveHistory]);
 
   const handleProductFound = async (productId: string): Promise<boolean> => {
-    const product = await findProductById(productId); // findProductById is already async
+    console.log("handleProductFound called with ID:", productId);
+    const product = await findProductById(productId);
+    
     if (product) {
+      console.log("Product found:", product);
       setCurrentProduct(product);
       // Switch to search tab when a product is found
       setActiveTab("search");
       return true; // Indicate success
     }
+    
+    console.log("Product not found for ID:", productId);
     return false; // Indicate failure (product not found)
   };
 
@@ -81,7 +98,7 @@ const Index = () => {
           <TabsContent value="search" className="mt-0">
             <SearchPage
               currentProduct={currentProduct}
-              onProductFound={handleProductFound} // Pass the modified async function
+              onProductFound={handleProductFound}
               searchHistory={searchHistory}
               onSelectProduct={handleSelectFromHistory}
               clearHistory={clearHistory}
